@@ -38,7 +38,7 @@ a{color:#b4bdff;text-decoration:underline;text-underline-offset:3px}.actions{dis
 <h2>Sign in</h2><p class="muted small">Use the email and password associated with your member account.</p>
 <label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" required>
 <label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required>
-<p><button type="submit">Sign in</button></p>
+<p><button type="submit">Sign in</button></p><div class="actions"><button type="button" id="resendVerification" class="secondary">Resend confirmation email</button><button type="button" id="forgotPassword" class="secondary">Forgot password?</button></div><p class="muted small">A confirmed email address and admin approval are both required. If your confirmation email is not arriving, contact the site administrator to check the mail configuration.</p>
 </form>
 <form id="registerForm" class="card">
 <h2>Request an account</h2><p class="muted small">Verify your email, then an administrator must approve your account.</p>
@@ -49,16 +49,18 @@ a{color:#b4bdff;text-decoration:underline;text-underline-offset:3px}.actions{dis
 </form>
 </div>
 </section>
+<section id="recoveryPanel" class="card hidden"><h2>Set a new password</h2><form id="recoveryForm"><label for="recoveryPassword">New password (12+ characters)</label><input type="password" id="recoveryPassword" autocomplete="new-password" minlength="12" required><p><button type="submit">Save new password</button></p></form></section>
 <section id="pendingPanel" class="card hidden"><h2>Account approval required</h2><p id="pendingStatus"></p><p class="muted">Sign-in access does not grant access to the product and inventory database. Your account must be approved by an administrator.</p><button id="refreshStatus" class="secondary">Check approval</button></section>
 <section id="appPanel" class="hidden">
 <div class="tabs" role="tablist" aria-label="Member sections">
-<button data-tab="products" class="active">Products</button><button data-tab="watches">My watchlist</button><button data-tab="offers">Retailer reports</button><button data-tab="alerts">Alerts <span id="alertCount"></span></button><button data-tab="admin" id="adminTabButton" class="hidden">Admin</button>
+<button data-tab="products" class="active">Products</button><button data-tab="stores">Retailers</button><button data-tab="watches">My watchlist</button><button data-tab="offers">Retailer reports</button><button data-tab="alerts">Alerts <span id="alertCount"></span></button><button data-tab="admin" id="adminTabButton" class="hidden">Admin</button>
 </div>
 <div id="productsTab" class="tabpage">
 <div class="card"><div class="row spread"><div><h2>Product catalog</h2><div class="muted small">Official product information where available; catalog inclusion does not establish stock.</div></div><button id="refreshCatalog" class="secondary">Refresh</button></div>
 <div class="twocol"><div><label for="productSearch">Search sets and products</label><input id="productSearch" placeholder="Umbreon, booster bundle, tin…"></div>
 <div><label for="categoryFilter">Type</label><select id="categoryFilter"><option value="">All categories</option><option value="booster_box">Booster boxes</option><option value="booster_bundle">Booster bundles</option><option value="etb">Elite Trainer Boxes</option><option value="tin">Tins</option><option value="collection">Collections</option><option value="blister">Blisters</option><option value="other">Other</option></select></div></div>
 </div><div id="productResults" class="grid"></div></div>
+<div id="storesTab" class="tabpage hidden"><div class="card"><div class="row spread"><div><h2>Central New York retailers</h2><p class="muted small">Store directory only. Listing a shop does not confirm any particular Pokémon product is in stock. Call or check the retailer before traveling.</p></div><button id="refreshStores" class="secondary">Refresh stores</button></div><div id="storeResults" class="grid"></div></div></div>
 <div id="watchesTab" class="tabpage hidden"><div class="card"><h2>My saved watches</h2><p class="muted small">Set a maximum price and the towns you want alerts from. Leaving towns blank includes online stores and all locations.</p><div id="watchResults"></div></div></div>
 <div id="offersTab" class="tabpage hidden"><div class="card"><div class="row spread"><h2>Retailer reports</h2><button id="refreshOffers" class="secondary">Refresh reports</button></div><p class="muted small">Inventory evidence comes from verified feeds or recorded administrator checks. Availability can change quickly; always confirm with the retailer before traveling. Unknown is not the same as out of stock.</p><div id="offerResults"></div></div></div>
 <div id="alertsTab" class="tabpage hidden"><div class="card"><div class="row spread"><h2>In-app alerts</h2><button id="refreshAlerts" class="secondary">Refresh alerts</button></div><p class="muted small">Alerts are recorded in the database when new verified in-stock reports match your watchlist. Push, email, and Discord delivery require additional integrations.</p><div id="alertResults"></div></div></div>
