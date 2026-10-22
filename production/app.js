@@ -16,6 +16,7 @@ function tab(name){document.querySelectorAll(".tabpage").forEach(n=>visible(n.id
 document.querySelectorAll("[data-tab]").forEach(n=>n.onclick=()=>{tab(n.dataset.tab);if(n.dataset.tab==="admin")void loadAdmin().catch(handle)});
 function showAuth(){profile=null;session=null;$("identity").textContent="";visible("authPanel",true);visible("pendingPanel",false);visible("appPanel",false);visible("signOut",false)}
 async function refreshAuth(){
+  if(recoveryMode)return;
   const {data:{session:s},error}=await db.auth.getSession();if(error)throw error;
   if(!s){showAuth();return}
   session=s;
