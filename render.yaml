@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: cny-pokemon-watch
+    runtime: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port ${PORT:-10000}
+    healthCheckPath: /health
+    autoDeployTrigger: commit
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.8"
+      - key: APP_DB
+        value: /data/cny.sqlite3
+      - key: COOKIE_SECURE
+        value: "1"
+      - key: INITIAL_ADMIN_USERNAME
+        sync: false
+      - key: INITIAL_ADMIN_PASSWORD
+        sync: false
+    disk:
+      name: cny-watch-data
+      mountPath: /data
+      sizeGB: 1
