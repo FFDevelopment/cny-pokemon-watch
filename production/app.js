@@ -57,7 +57,7 @@ function renderProducts(){
  if(p.official_url){const a=el("a","Official details ↗");a.href=p.official_url;a.target="_blank";a.rel="noopener noreferrer";row.append(a)}c.append(row);box.append(c)}
 }
 async function addWatch(slug){await query(db.from("cny_watches").upsert({user_id:session.user.id,product_slug:slug},{onConflict:"user_id,product_slug"}));message("Added to watchlist");await loadWatches();renderProducts()}
-async function loadWatches(){watches=await query(db.from("cny_watches").select("user_id,product_slug,max_price,towns").eq("user_id",session.user.id).limit(500));renderWatches()}
+async function loadWatches(){watches=await query(db.from("cny_watches").select("user_id,product_slug,max_price,towns").eq("user_id",session.user.id).limit(500));renderWatches();renderProducts()}
 function renderWatches(){const b=$("watchResults");b.replaceChildren();if(!watches.length){b.append(el("p","Your watchlist is empty. Open Products to add items.","muted"));return}
  for(const w of watches){
  const p=products.find(x=>x.slug===w.product_slug),section=el("div",undefined,"item");section.append(el("strong",p?.name||w.product_slug));
