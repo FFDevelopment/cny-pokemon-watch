@@ -1,52 +1,65 @@
-# CNY Pokémon Watch — Separate Production Application
+# CNY Pokémon Watch — Production Setup and QA
 
-This repository is independent of **FFDPackLabs** and must use its own Supabase project. The root `index.html` is a **browser-local demo**, not secure production. The `production/` directory contains the new Supabase-backed frontend.
+CNY Pokémon Watch is independent of FFDPackLabs and AFewBuds. Only operate on Supabase project `jrwsbiqxppjcyhgncztf`.
 
-## Current status
-- GitHub Pages: static hosting works.
-- Production frontend: source prepared, **not connected** to a Supabase project.
-- Secure database schema: `supabase/schema.sql`, **not applied** yet.
-- Real accounts and admin approvals: implemented in code, **not verified on a live database**.
-- Product catalog: existing browser-demo entries are separate from the database; production catalog requires seeding/administration.
-- Retailer monitoring: **not implemented**. Current offers are entered manually by administrators, and in-app notifications follow verified offer events. Push/Discord/email delivery and scheduled monitoring are still future work.
+## Current deployed architecture (2026-10-22)
+- GitHub Pages: `https://ffdevelopment.github.io/cny-pokemon-watch/` redirects to `production/`
+- Production frontend: `production/index.html`, `production/app.js`, `production/config.js`
+- Backend: dedicated Supabase PostgreSQL/Auth project (`cny-pokemon-watch`, region us-east-1)
+- Schema installed: `supabase/schema.sql` + `supabase/offer_integrity.sql` (already applied)
+- Admin: verified owner account initialized; member approvals available in production Admin tab
+- Catalog: 30 seeded entries, 14 store directory records. **No real-time availability provider is connected.**
+- Notifications: in-app database entries triggered by qualifying manually confirmed offers; no email, Discord, or push sender yet
+- Continuous inventory scanning: **not implemented**; do not claim live restock monitoring
 
-## Dedicated database provisioning
-1. Create a **new** Supabase project named `cny-pokemon-watch` in the intended organization. **Do not run this SQL in AFewBuds or FFDPackLabs databases.**
-2. Configure Supabase Auth email/password, verified-email settings, rate limits, authorized site and redirect URL for `https://ffdevelopment.github.io/cny-pokemon-watch/production/`.
-3. Review and apply `supabase/schema.sql` in the *new* project's SQL editor. Keep RLS enabled.
-4. Copy only that project's **public project URL and publishable key** into `production/config.js`. Never commit a secret, service-role key, database password, or admin password.
-5. Publish the `production/` directory through existing GitHub Pages workflow, and verify in a browser on iPhone, Android, and desktop.
+## Critical operational settings to finish
 
-## Secure initial admin creation
-Admin permissions do **not** come from signup metadata. First register your own account with your intended username and email; verify the email. In the dedicated CNY Supabase project's SQL editor, with project owner privileges, run the following **only after replacing the exact email**:
+1. Supabase Dashboard > Authentication > URL Configuration:
+   - Site URL: `https://ffdevelopment.github.io/cny-pokemon-watch/production/`
+   - Additional Redirect URLs: add the same exact URL.
+2. Supabase Dashboard > Authentication > SMTP Settings:
+   - Configure an independently managed transactional email SMTP provider. Default Supabase SMTP does **not** send to arbitrary public recipients.
+   - Test email verification and password reset with a disposable external address before public invitation.
+   - Keep SMTP passwords in Supabase configuration only; NEVER place secrets in GitHub.
+3. Supabase Auth > Email settings:
+   - Keep Confirm Email enabled.
+   - Configure strong password requirements through Auth settings (frontend minimum is 12).
+   - Supabase leaked password protection requires an eligible paid plan; security advisor currently flags it as disabled.
+4. Set up database backups/restore procedures and verify a restoration. Current free plan may not offer scheduled backups.
+5. Configure actual permitted retailer APIs or licensed structured stock feeds, with allowed polling rates and current store-level inventory evidence; implement and validate a hosted scheduler. News/RSS articles are **not** stock evidence.
+6. Add real push/email/Discord alert delivery with rate limits and unsubscribe controls if desired.
 
-```sql
-UPDATE public.cny_profiles AS p
-SET role = 'admin', status = 'approved'
-FROM auth.users AS u
-WHERE p.id = u.id
-  AND lower(u.email) = lower('REPLACE_WITH_YOUR_VERIFIED_ADMIN_EMAIL')
-  AND u.email_confirmed_at IS NOT NULL
-  AND p.role = 'member'
-RETURNING p.id, p.username, p.role, p.status;
-```
+## Admin workflow
 
-Verify that **exactly one row** is returned, and retain a separate recovery procedure through Supabase's owner-only SQL console.
+1. Owner account is already initialized, approved, and email-verified.
+2. At `/production/`, sign in and choose Admin.
+3. New confirmed users remain `pending`. Select Approve to give them access.
+4. Rejection or disablement immediately blocks member data at the RLS layer, including for sessions that remain signed in.
 
-## End-to-end acceptance checks
-1. Register a new member and verify email (if enabled).
-2. Confirm account is **pending** and cannot read products, watches, stores, offers, or notifications using the Data API.
-3. Sign in as the independently bootstrapped admin. Confirm the admin can list pending members.
-4. Approve a test account. Verify that it gains the ability to browse products and manage **only its own** watches.
-5. Attempt direct Data API requests from one member to another member's watches and notifications. Expect access denied or no rows.
-6. Disable a user. Confirm the next requests to protected data fail, including from an already signed-in session.
-7. Test case-insensitive duplicate usernames.
-8. Add a real product and store, then record an **actually verified** in-stock offer. Verify matching in-app alert(s), town filters, and max-price constraints.
-9. Verify cross-device session sign-in with the same account, and recovery/sign-out.
-10. Run Supabase security advisors, review permissions, and implement backups/uptime monitoring before production launch.
+Only one profile can be initial owner. Never assign admin roles based on signup metadata.
 
-### Limitations and security notes
-- Manual retailer reports are not real-time monitoring. Do not represent a source as verified unless checked.
-- GitHub Pages will not run the existing `app.py` FastAPI server; do not assume those endpoints are active.
-- `production/index.html` runs as a static frontend but is **not active production** until separate Supabase creation, schema migration, seeded catalog, configured client, and live security tests are complete.
-- Use officially permitted retailer APIs/feeds for future monitoring; do not bypass bot defenses or fabricate inventory.
+## Verification results and limitations
+
+Checks run inside transactions which were rolled back, preserving live users and watches:
+- User registration trigger created a pending member profile.
+- Pending member could read only their own profile, not product or store data.
+- Pending member could not approve themselves.
+- Existing approved administrator could approve a transaction-only test member and access protected catalog.
+- New manually verified in-stock evidence generated a matching notification.
+- A price decrease crossing a watch's maximum-price threshold generated a qualifying alert.
+- No fake offers, alerts, users, or price changes persisted after tests.
+- RLS was confirmed enabled on all six tables, and indexes added for the referenced foreign keys.
+- GitHub Actions validates production app JS module syntax and HTML element IDs before its deploy workflow.
+- Actual external email delivery, two-device authenticated browser sign-in, and real retailer-feed stock updates are NOT covered by those tests.
+
+### If account registration fails
+Check SMTP authorization/rate limits, Auth Site URL + Redirect URLs, browser console, and Supabase Auth logs. Never disable email verification or RLS to hide a configuration issue.
+
+### If member approvals appear not to work
+Confirm current account role is `admin` and status is `approved`; verify the member is not already `admin`. Admin actions now confirm the returned updated row instead of silently displaying success.
+
+### If no restock alerts appear
+There are no live stock feeds or recorded offers. Add a genuinely verified retailer offer through Admin. The app cannot detect inventory just because a retailer name or official product URL exists.
+
+### Release standards
+Complete SMTP, actual external-member signup approval, iPhone/Android/Windows smoke tests, monitored stock source(s), external notifications, backups, and incident logging before labeling this a feature-complete public release.
