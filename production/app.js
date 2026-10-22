@@ -81,7 +81,7 @@ listenForm("offerForm",async()=>{
  const status=$("adminOfferStatus").value,url=$("adminOfferUrl").value.trim(),price=$("adminOfferPrice").value;
  if(!url.startsWith("https://"))throw Error("Retailer URL must use HTTPS");
  if(status==="in_stock"&&!confirm("Did you personally verify this offer is actually in stock? This may trigger member alerts."))return;
- await query(db.from("cny_offers").insert({product_slug:$("adminOfferProduct").value,store_id:$("adminOfferStore").value,product_url:url,price:price?Number(price):null,stock_status:status,verified_at:status==="unknown"?null:new Date().toISOString(),verification_method:status==="unknown"?null:"admin_confirmation"}));message("Report saved");$("offerForm").reset();await loadOffers();await loadAlerts();
+ await query(db.from("cny_offers").upsert({product_slug:$("adminOfferProduct").value,store_id:$("adminOfferStore").value,product_url:url,price:price?Number(price):null,stock_status:status,verified_at:status==="unknown"?null:new Date().toISOString(),verification_method:status==="unknown"?null:"admin_confirmation"},{onConflict:"product_slug,store_id,product_url"}));message("Report saved");$("offerForm").reset();await loadOffers();await loadAlerts();
 });
 async function init(){
  if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){visible("setupPanel",true);message("Dedicated production database setup is required.");return}
