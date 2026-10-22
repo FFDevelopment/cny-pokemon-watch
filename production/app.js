@@ -87,6 +87,8 @@ listenForm("offerForm",async()=>{
  if(status==="in_stock"&&!confirm("Did you personally verify this offer is actually in stock? This may trigger member alerts."))return;
  await query(db.from("cny_offers").upsert({product_slug:$("adminOfferProduct").value,store_id:$("adminOfferStore").value,product_url:url,price:price?Number(price):null,stock_status:status,verified_at:status==="unknown"?null:new Date().toISOString(),verification_method:status==="unknown"?null:"admin_confirmation"},{onConflict:"product_slug,store_id,product_url"}));message("Report saved");$("offerForm").reset();await loadOffers();await loadAlerts();
 });
+$("resendEmail").onclick=async()=>{try{const email=$("loginEmail").value.trim();if(!email)throw Error("Enter your email above first.");const {error}=await db.auth.resend({type:"signup",email,options:{emailRedirectTo:new URL("./",location.href).href}});if(error)throw error;message("If your email is eligible, confirmation instructions have been requested. Check your inbox and spam folder.")}catch(e){handle(e)}};
+$("resetEmail").onclick=async()=>{try{const email=$("loginEmail").value.trim();if(!email)throw Error("Enter your email above first.");const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:new URL("./",location.href).href});if(error)throw error;message("If an account exists, password reset instructions have been requested.")}catch(e){handle(e)}};
 async function init(){
  if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){visible("setupPanel",true);message("Dedicated production database setup is required.");return}
  db=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
