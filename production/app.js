@@ -95,4 +95,6 @@ async function init(){
  db=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
  db.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){recoveryMode=true;visible("passwordRecoveryPanel",true);visible("authPanel",false);visible("pendingPanel",false);visible("appPanel",false);visible("signOut",false)}else if(event==="SIGNED_OUT"){recoveryMode=false;visible("passwordRecoveryPanel",false);showAuth()}});await refreshAuth();
 }
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&db&&!recoveryMode)refreshAuth().catch(handle)});
+setInterval(()=>{if(!document.hidden&&session&&profile?.status==="approved")loadAlerts().catch(handle)},120000);
 init().catch(e=>{handle(e);visible("setupPanel",true)});
