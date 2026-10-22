@@ -1,27 +1,30 @@
-name: Deploy CNY Pokémon Watch demo to GitHub Pages
+name: Deploy CNY Pokémon Watch
 on:
   push:
     branches: [main]
-    paths:
-      - index.html
-      - .github/workflows/pages.yml
   workflow_dispatch:
 permissions:
   contents: read
   pages: write
   id-token: write
 concurrency:
-  group: pages
+  group: cny-pages
   cancel-in-progress: true
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     steps:
       - name: Check out
         uses: actions/checkout@v4
+      - name: Validate production JavaScript syntax
+        run: |
+          node --input-type=module --check < production/app.js
+          node --input-type=module --check < production/config.js
+      - name: Verify production HTML and JavaScript wiring
+        run: node tests/production-ui.test.cjs
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
