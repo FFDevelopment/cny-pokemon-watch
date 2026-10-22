@@ -93,6 +93,6 @@ listenForm("passwordRecoveryForm",async()=>{const password=$("newRecoveryPasswor
 async function init(){
  if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){visible("setupPanel",true);message("Dedicated production database setup is required.");return}
  db=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
- await refreshAuth();db.auth.onAuthStateChange((event)=>{if(event==="SIGNED_OUT")showAuth()});
+ db.auth.onAuthStateChange((event)=>{if(event==="PASSWORD_RECOVERY"){recoveryMode=true;visible("passwordRecoveryPanel",true);visible("authPanel",false);visible("pendingPanel",false);visible("appPanel",false);visible("signOut",false)}else if(event==="SIGNED_OUT"){recoveryMode=false;visible("passwordRecoveryPanel",false);showAuth()}});await refreshAuth();
 }
 init().catch(e=>{handle(e);visible("setupPanel",true)});
