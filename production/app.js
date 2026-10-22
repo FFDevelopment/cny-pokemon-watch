@@ -7,6 +7,7 @@ const fmt=n=>n===null||n===undefined?"Price unavailable":"$"+Number(n).toFixed(2
 const categories={booster_box:"Booster box",booster_bundle:"Booster bundle",etb:"Elite Trainer Box",tin:"Tin",collection:"Collection",blister:"Blister",other:"Other"};
 const towns=["Solvay","Syracuse","Liverpool","Cicero","Clay","Baldwinsville","Camillus","DeWitt","Fayetteville","Manlius","Brewerton","Central Square","Phoenix","Fulton","Oswego","Oneida","Canastota","Verona"];
 let db=null,profile=null,session=null,products=[],stores=[],offers=[],watches=[],alerts=[];
+let recoveryMode=false;
 function el(tag,txt,cls){let n=document.createElement(tag);if(txt!==undefined)n.textContent=String(txt);if(cls)n.className=cls;return n}
 function btn(txt,fn,cls="secondary"){let n=el("button",txt,cls);n.type="button";n.onclick=()=>Promise.resolve(fn()).catch(handle);return n}
 function handle(e){console.error(e);message(e?.message||"Operation failed")}
