@@ -23,6 +23,7 @@ The root URL redirects to the real Supabase-backed portal. Demo browser accounts
 - Updates to existing offers without duplicating the same product/store/link
 - In-app notifications triggered by qualifying recent in-stock evidence and price thresholds
 - Stale-offer warning after one hour
+- Supabase Cron checks every 10 minutes and resets in-stock reports older than 60 minutes to unknown (automatic expiration, **not retailer polling**).
 - GitHub Actions production JavaScript syntax check and UI element contract check before deployment
 
 ## Not yet production complete
