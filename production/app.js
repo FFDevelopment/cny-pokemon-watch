@@ -89,6 +89,7 @@ listenForm("offerForm",async()=>{
 });
 $("resendEmail").onclick=async()=>{try{const email=$("loginEmail").value.trim();if(!email)throw Error("Enter your email above first.");const {error}=await db.auth.resend({type:"signup",email,options:{emailRedirectTo:new URL("./",location.href).href}});if(error)throw error;message("If your email is eligible, confirmation instructions have been requested. Check your inbox and spam folder.")}catch(e){handle(e)}};
 $("resetEmail").onclick=async()=>{try{const email=$("loginEmail").value.trim();if(!email)throw Error("Enter your email above first.");const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:new URL("./",location.href).href});if(error)throw error;message("If an account exists, password reset instructions have been requested.")}catch(e){handle(e)}};
+listenForm("passwordRecoveryForm",async()=>{const password=$("newRecoveryPassword").value;if(password.length<12)throw Error("Use at least 12 characters.");const {error}=await db.auth.updateUser({password});if(error)throw error;$("newRecoveryPassword").value="";recoveryMode=false;visible("passwordRecoveryPanel",false);await db.auth.signOut();showAuth();message("Password updated. Sign in with your new password.")});
 async function init(){
  if(!SUPABASE_URL||!SUPABASE_PUBLISHABLE_KEY){visible("setupPanel",true);message("Dedicated production database setup is required.");return}
  db=createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{autoRefreshToken:true,persistSession:true,detectSessionInUrl:true}});
