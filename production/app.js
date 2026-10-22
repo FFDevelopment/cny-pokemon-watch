@@ -44,6 +44,7 @@ $("signOut").onclick=async()=>{try{const {error}=await db.auth.signOut();if(erro
 $("refreshStatus").onclick=()=>refreshAuth().catch(handle);
 $("refreshCatalog").onclick=()=>loadProducts().catch(handle);
 $("refreshOffers").onclick=()=>loadOffers().catch(handle);
+$("refreshStores").onclick=()=>loadStores().catch(handle);
 $("refreshAlerts").onclick=()=>loadAlerts().catch(handle);
 $("productSearch").oninput=renderProducts;$("categoryFilter").onchange=renderProducts;
 async function loadProducts(){products=await query(db.from("cny_products").select("slug,name,expansion,category,release_date,official_url").eq("available",true).order("release_date",{ascending:false}).limit(500));renderProducts()}
