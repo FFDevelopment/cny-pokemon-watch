@@ -23,7 +23,7 @@ async function refreshAuth(){
   visible("signOut",true);visible("authPanel",false);
   if(profile.status!=="approved"){visible("appPanel",false);visible("pendingPanel",true);$("pendingStatus").textContent=profile.username+" is "+profile.status;return}
   visible("pendingPanel",false);visible("appPanel",true);visible("adminTabButton",profile.role==="admin");
-  await Promise.all([loadProducts(),loadWatches(),loadOffers(),loadAlerts()]);
+  await loadProducts(); await loadStores(); await Promise.all([loadWatches(),loadOffers(),loadAlerts()]);
   if(profile.role==="admin")await loadAdmin();
 }
 function listenForm(id,fn){$(id).addEventListener("submit",async ev=>{ev.preventDefault();const b=ev.submitter;if(b)b.disabled=true;try{await fn()}catch(e){handle(e)}finally{if(b)b.disabled=false}})}
