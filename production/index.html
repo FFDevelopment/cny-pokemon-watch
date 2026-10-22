@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#11172d">
+<meta name="referrer" content="no-referrer">
+<title>CNY Pokémon Watch | Member Portal</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color-scheme:dark;--bg:#0d1226;--card:#171f38;--edge:#354368;--text:#f1f4ff;--muted:#aab7d7;--accent:#7779ff;--green:#99efc6}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% -20%,#263872,transparent 45%),var(--bg);color:var(--text)}
+main{max-width:1160px;margin:0 auto;padding:18px 16px 70px}header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:14px;padding:12px 0 22px}
+h1{font-size:clamp(27px,4vw,39px);letter-spacing:-.04em;margin:4px 0}h2{font-size:20px;margin:5px 0 13px}h3{margin:8px 0}p{line-height:1.5}.eyebrow{font-size:12px;letter-spacing:.14em;font-weight:800;color:#a9abff;text-transform:uppercase}
+.muted{color:var(--muted)}.small{font-size:13px}.hidden{display:none!important}.card{border:1px solid var(--edge);background:var(--card);border-radius:15px;padding:18px;margin-bottom:14px}
+.subcard{background:#10192f;border:1px solid #304168;border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(245px,1fr));gap:12px}.twocol{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:15px}
+label{display:block;color:#c6d0ef;font-size:13px;font-weight:650;margin:9px 0 5px}input,select,button{font:inherit;border-radius:9px;min-height:41px}input,select{width:100%;color:white;border:1px solid #546488;background:#10172b;padding:10px}input:focus,select:focus,button:focus-visible{outline:2px solid #a1b0ff;outline-offset:2px}
+button{background:var(--accent);color:#fff;border:0;padding:10px 13px;font-weight:700;cursor:pointer}button:disabled{opacity:.5;cursor:wait}.secondary{background:#354567}.danger{background:#a84b6d}.minimal{background:transparent;border:1px solid #58648b}
+button:hover:not(:disabled){filter:brightness(1.1)}.row{display:flex;flex-wrap:wrap;align-items:center;gap:10px}.spread{justify-content:space-between}.grow{flex:1;min-width:150px}
+.tabs{display:flex;gap:5px;overflow-x:auto;border-bottom:1px solid #3c4a70;padding-bottom:10px;margin-bottom:16px}
+.tabs button{white-space:nowrap;background:#293455}.tabs button.active{background:var(--accent)}
+.flag{border-radius:20px;padding:5px 10px;font-size:12px;font-weight:800;background:#2c3a60}.good{color:var(--green)}.warn{color:#ffcb88}
+#notice{margin:4px 0 17px;padding:10px 12px;border:1px solid #50609e;border-radius:9px;background:#263052;min-height:44px}
+#notice:empty{display:none}.item{border-top:1px solid #36456b;padding:12px 0}.item:first-child{border-top:0}
+a{color:#b4bdff;text-decoration:underline;text-underline-offset:3px}.actions{display:flex;gap:8px;flex-wrap:wrap}
+.actions button{font-size:12px;padding:8px 10px;min-height:35px}.wrap{overflow-wrap:anywhere}
+@media(max-width:550px){.card{padding:13px}header{padding-bottom:13px}.grid{grid-template-columns:1fr}}
+</style></head>
+<body><main>
+<header>
+<div><span class="eyebrow">FFDevelopment · Central New York</span><h1>⚡ CNY Pokémon Watch</h1><span class="muted">Products · Retailers · Restock alerts</span></div>
+<div class="row"><span id="identity" class="small muted"></span><button id="signOut" class="secondary hidden">Sign out</button></div>
+</header>
+<div id="notice" role="status" aria-live="polite"></div>
+<section id="setupPanel" class="card hidden"><h2>Production setup not connected</h2><p>The secure account database has not been configured for this installation. No demo credentials are accepted on this page.</p><p class="muted small">The repository administrator must configure a dedicated Supabase project and set <code>config.js</code> to its public URL and publishable key. Never place a service-role or secret key in this repository.</p><a href="../">Go to the browser demo</a></section>
+<section id="authPanel" class="hidden">
+<div class="twocol">
+<form id="loginForm" class="card">
+<h2>Sign in</h2><p class="muted small">Use the email and password associated with your member account.</p>
+<label for="loginEmail">Email</label><input id="loginEmail" type="email" autocomplete="email" required>
+<label for="loginPassword">Password</label><input id="loginPassword" type="password" autocomplete="current-password" required>
+<p><button type="submit">Sign in</button></p>
+</form>
+<form id="registerForm" class="card">
+<h2>Request an account</h2><p class="muted small">Verify your email, then an administrator must approve your account.</p>
+<label for="newUsername">Username (3–24 characters)</label><input id="newUsername" type="text" pattern="[a-zA-Z0-9_]{3,24}" autocomplete="username" required maxlength="24">
+<label for="newEmail">Email</label><input id="newEmail" type="email" autocomplete="email" required>
+<label for="newPassword">Password (minimum 12 characters)</label><input id="newPassword" type="password" autocomplete="new-password" minlength="12" required>
+<p><button type="submit">Request access</button></p>
+</form>
+</div>
+</section>
+<section id="pendingPanel" class="card hidden"><h2>Account approval required</h2><p id="pendingStatus"></p><p class="muted">Sign-in access does not grant access to the product and inventory database. Your account must be approved by an administrator.</p><button id="refreshStatus" class="secondary">Check approval</button></section>
+<section id="appPanel" class="hidden">
+<div class="tabs" role="tablist" aria-label="Member sections">
+<button data-tab="products" class="active">Products</button><button data-tab="watches">My watchlist</button><button data-tab="offers">Retailer reports</button><button data-tab="alerts">Alerts <span id="alertCount"></span></button><button data-tab="admin" id="adminTabButton" class="hidden">Admin</button>
+</div>
+<div id="productsTab" class="tabpage">
+<div class="card"><div class="row spread"><div><h2>Product catalog</h2><div class="muted small">Official product information where available; catalog inclusion does not establish stock.</div></div><button id="refreshCatalog" class="secondary">Refresh</button></div>
+<div class="twocol"><div><label for="productSearch">Search sets and products</label><input id="productSearch" placeholder="Umbreon, booster bundle, tin…"></div>
+<div><label for="categoryFilter">Type</label><select id="categoryFilter"><option value="">All categories</option><option value="booster_box">Booster boxes</option><option value="booster_bundle">Booster bundles</option><option value="etb">Elite Trainer Boxes</option><option value="tin">Tins</option><option value="collection">Collections</option><option value="blister">Blisters</option><option value="other">Other</option></select></div></div>
+</div><div id="productResults" class="grid"></div></div>
+<div id="watchesTab" class="tabpage hidden"><div class="card"><h2>My saved watches</h2><p class="muted small">Set a maximum price and the towns you want alerts from. Leaving towns blank includes online stores and all locations.</p><div id="watchResults"></div></div></div>
+<div id="offersTab" class="tabpage hidden"><div class="card"><div class="row spread"><h2>Retailer reports</h2><button id="refreshOffers" class="secondary">Refresh reports</button></div><p class="muted small">Inventory evidence comes from verified feeds or recorded administrator checks. Availability can change quickly; always confirm with the retailer before traveling. Unknown is not the same as out of stock.</p><div id="offerResults"></div></div></div>
+<div id="alertsTab" class="tabpage hidden"><div class="card"><div class="row spread"><h2>In-app alerts</h2><button id="refreshAlerts" class="secondary">Refresh alerts</button></div><p class="muted small">Alerts are recorded in the database when new verified in-stock reports match your watchlist. Push, email, and Discord delivery require additional integrations.</p><div id="alertResults"></div></div></div>
+<div id="adminTab" class="tabpage hidden">
+<div class="card"><h2>Administrator · Member approvals</h2><p class="muted small">Only authenticated approved admins can update member statuses. Enforcement is in the database, not just this interface.</p><div id="memberResults"></div></div>
+<div class="twocol">
+<form class="card" id="productForm"><h2>Add a product</h2>
+<label for="adminProductSlug">Unique product slug</label><input id="adminProductSlug" required pattern="[a-z0-9-]+">
+<label for="adminProductName">Product name</label><input id="adminProductName" required>
+<label for="adminProductExpansion">Set / expansion</label><input id="adminProductExpansion" required>
+<label for="adminProductCategory">Category</label><select id="adminProductCategory"><option value="booster_box">Booster box</option><option value="booster_bundle">Booster bundle</option><option value="etb">Elite Trainer Box</option><option value="tin">Tin</option><option value="collection">Collection</option><option value="blister">Blister</option><option value="other">Other</option></select>
+<label for="adminProductRelease">Release date</label><input id="adminProductRelease" type="date">
+<label for="adminProductUrl">Official HTTPS product URL</label><input id="adminProductUrl" type="url" placeholder="https://">
+<p><button type="submit">Save product</button></p></form>
+<form class="card" id="storeForm"><h2>Add a retailer location</h2>
+<label for="adminStoreRetailer">Retailer</label><input id="adminStoreRetailer" required>
+<label for="adminStoreName">Store name</label><input id="adminStoreName" required>
+<label for="adminStoreTown">Town</label><input id="adminStoreTown" required placeholder="Syracuse or Online">
+<label for="adminStoreAddress">Address (optional)</label><input id="adminStoreAddress">
+<label for="adminStoreWebsite">HTTPS website (optional)</label><input id="adminStoreWebsite" type="url" placeholder="https://">
+<label><input id="adminStoreOnline" style="width:auto;min-height:auto" type="checkbox"> Online retailer</label>
+<p><button type="submit">Save retailer</button></p></form>
+</div>
+<form class="card" id="offerForm"><h2>Record a verified offer</h2>
+<p class="muted small">Never mark stock available without checking a legitimate source. Updating a product from unknown/out-of-stock to in-stock creates matching in-app alerts.</p>
+<div class="twocol"><div><label for="adminOfferProduct">Product</label><select id="adminOfferProduct" required></select></div><div><label for="adminOfferStore">Store</label><select id="adminOfferStore" required></select></div>
+<div><label for="adminOfferPrice">Price ($, optional)</label><input id="adminOfferPrice" type="number" min="0" max="100000" step=".01"></div>
+<div><label for="adminOfferStatus">Stock report</label><select id="adminOfferStatus"><option value="unknown">Not checked</option><option value="out_of_stock">Out of stock (checked)</option><option value="in_stock">In stock (confirmed)</option></select></div></div>
+<label for="adminOfferUrl">Retailer product URL (HTTPS)</label><input id="adminOfferUrl" type="url" placeholder="https://" required>
+<p><button type="submit">Save retailer report</button></p>
+</form>
+</div>
+</section>
+<footer class="small muted">CNY Pokémon Watch · Independent application by FFDevelopment · No affiliate or official Pokémon endorsement · Product reports may be delayed.</footer>
+</main>
+<script type="module" src="./app.js"></script>
+</body></html>
